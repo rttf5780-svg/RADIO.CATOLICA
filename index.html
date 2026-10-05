@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+
   <base target="_top">
   <style>
     * {
@@ -102,16 +103,38 @@
   </div>
 
   <script>
+    // REEMPLAZA ESTA URL CON TU URL DE DESPLIEGUE DE GOOGLE APPS SCRIPT
+    const GOOGLE_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyjdmWNcSRFgiy2TUOjnPv7Fdk3CjPXl_BREcRGs7MHh0ck1Ka-A2f0sM-BW7_OF4DnYQ/exec";
+
     window.onload = function() {
-      google.script.run.withSuccessHandler(renderStations).getEmisoras();
+      fetchEmisoras();
     };
+
+    function fetchEmisoras() {
+      fetch(GOOGLE_SCRIPT_WEB_APP_URL)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Error en la respuesta de la red: ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          renderStations(data);
+        })
+        .catch(error => {
+          console.error('Error al obtener emisoras:', error);
+          const loadingElem = document.getElementById('loading');
+          loadingElem.style.color = '#ff4d4d';
+          loadingElem.innerText = 'Error al cargar las emisoras. Verifica la conexión o la URL del servicio.';
+        });
+    }
 
     function renderStations(emisoras) {
       document.getElementById('loading').style.display = 'none';
       const container = document.getElementById('stationList');
       container.innerHTML = '';
 
-      if (emisoras.length === 0) {
+      if (!emisoras || emisoras.length === 0) {
         container.innerHTML = '<p>No hay emisoras disponibles.</p>';
         return;
       }
@@ -143,3 +166,4 @@
   </script>
 </body>
 </html>
+      
